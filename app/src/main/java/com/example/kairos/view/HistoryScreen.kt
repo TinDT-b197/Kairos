@@ -18,7 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.kairos.network.RetrofitClient
-import com.example.kairos.network.SaleTransaction
+import com.example.kairos.model.SaleTransaction
+
 import com.example.kairos.network.SessionManager
 import com.example.kairos.viewmodel.BookingViewModel
 
@@ -120,12 +121,12 @@ fun HistoryScreen(
                         items(bookings) { txn ->
                             HistoryCard(
                                 title = txn.title,
-                                subTitle = "Người dạy: ${txn.seller_name}",
-                                price = "${txn.price_diamonds} 💎",
+                                subTitle = "Người dạy: ${txn.sellerName}",
+                                price = "${txn.priceDiamonds} 💎",
                                 status = txn.status,
                                 isBuyer = true,
-                                onConfirm = { bookingViewModel.confirmTransaction(txn.transaction_id, userId) },
-                                onChat = { onNavigateToChat(txn.transaction_id) }
+                                onConfirm = { bookingViewModel.confirmTransaction(txn.transactionId, userId) },
+                                onChat = { onNavigateToChat(txn.transactionId) }
                             )
                         }
                     }

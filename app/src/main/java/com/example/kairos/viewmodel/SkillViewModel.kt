@@ -3,7 +3,7 @@ package com.example.kairos.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kairos.network.RetrofitClient
-import com.example.kairos.network.SkillRequest
+import com.example.kairos.model.SkillRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

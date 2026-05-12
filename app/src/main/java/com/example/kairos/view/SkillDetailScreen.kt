@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.kairos.network.SessionManager
-import com.example.kairos.network.Skill
+import com.example.kairos.model.Skill
 import com.example.kairos.viewmodel.SkillDetailViewModel
 import com.example.kairos.viewmodel.TransactionState
 
@@ -61,7 +61,7 @@ fun SkillDetailScreen(
         // Chi tiết bài đăng
         Text(text = skill.title, fontSize = 28.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Đăng bởi: ${skill.author_name}", color = Color.Gray, fontSize = 14.sp)
+        Text(text = "Đăng bởi: ${skill.authorName}", color = Color.Gray, fontSize = 14.sp)
 
         Spacer(modifier = Modifier.height(24.dp))
         HorizontalDivider(color = Color(0xFFEEEEEE))
@@ -86,7 +86,7 @@ fun SkillDetailScreen(
             ) {
                 Column {
                     Text("Giá khóa học", color = Color.Gray, fontSize = 14.sp)
-                    Text("${skill.price_diamonds} 💎", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    Text("${skill.priceDiamonds} 💎", fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Button(
@@ -96,7 +96,7 @@ fun SkillDetailScreen(
                         // Trong thực tế, class Skill của em cần có thêm trường seller_id
                         val sellerId = 1
                         if (buyerId != sellerId) {
-                            viewModel.bookSkill(buyerId, sellerId, skill.skill_id, skill.price_diamonds)
+                            viewModel.bookSkill(buyerId, sellerId, skill.skillId, skill.priceDiamonds)
                         } else {
                             Toast.makeText(context, "Bạn không thể tự mua kỹ năng của mình!", Toast.LENGTH_SHORT).show()
                         }

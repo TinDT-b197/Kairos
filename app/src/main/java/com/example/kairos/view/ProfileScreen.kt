@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.kairos.network.RetrofitClient
 import com.example.kairos.network.SessionManager
-import com.example.kairos.network.UserProfile
+import com.example.kairos.model.UserProfile
 
 @Composable
 fun ProfileScreen(

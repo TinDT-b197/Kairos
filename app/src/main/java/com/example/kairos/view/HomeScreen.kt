@@ -1,10 +1,12 @@
 package com.example.kairos.view
 
+import com.example.kairos.model.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable // Thêm thư viện để làm nút bấm
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,7 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.kairos.network.Skill
+import com.example.kairos.model.Skill
 import com.example.kairos.viewmodel.HomeViewModel
 
 @Composable
@@ -79,7 +81,7 @@ fun HomeScreen(
                         // Truyền lệnh click xuống cho từng cái thẻ
                         SkillCard(
                             skill = skill,
-                            onClick = onNavigateToSkillDetail
+                            onClick = { onNavigateToSkillDetail(skill) }
                         )
                     }
                 }
@@ -122,7 +124,7 @@ fun SkillCard(skill: Skill, onClick: (Skill) -> Unit) { // Thêm tham số onCli
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Bởi: ${skill.author_name}", fontSize = 12.sp, color = Color.Gray)
+                Text(text = "Bởi: ${skill.authorName}", fontSize = 12.sp, color = Color.Gray)
 
                 // Hiển thị giá kim cương nổi bật
                 Surface(
@@ -130,7 +132,7 @@ fun SkillCard(skill: Skill, onClick: (Skill) -> Unit) { // Thêm tham số onCli
                     color = Color(0xFFF5F5F5)
                 ) {
                     Text(
-                        text = "${skill.price_diamonds} 💎",
+                        text = "${skill.priceDiamonds} 💎",
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                     )

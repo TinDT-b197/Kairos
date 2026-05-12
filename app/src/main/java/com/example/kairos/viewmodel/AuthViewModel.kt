@@ -2,8 +2,8 @@ package com.example.kairos.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.kairos.network.LoginRequest
-import com.example.kairos.network.RegisterRequest
+import com.example.kairos.model.LoginRequest
+import com.example.kairos.model.RegisterRequest
 import com.example.kairos.network.RetrofitClient
 import com.example.kairos.network.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +27,7 @@ class AuthViewModel : ViewModel() {
             try {
                 val response = RetrofitClient.apiService.register(RegisterRequest(name, email, pass))
                 if (response.status == "success") {
-                    _authState.value = AuthState.Success(response.message, response.data?.diamond_balance ?: 0)
+                    _authState.value = AuthState.Success(response.message, response.data?.diamondBalance ?: 0)
                 } else {
                     _authState.value = AuthState.Error(response.message)
                 }
@@ -45,9 +45,9 @@ class AuthViewModel : ViewModel() {
                 if (response.status == "success") {
                     // LƯU VÀO NGĂN KÉO KHI THÀNH CÔNG
                     response.data?.let {
-                        sessionManager.saveUser(it.user_id, it.name)
+                        sessionManager.saveUser(it.userId, it.name)
                     }
-                    _authState.value = AuthState.Success(response.message, response.data?.diamond_balance ?: 0)
+                    _authState.value = AuthState.Success(response.message, response.data?.diamondBalance ?: 0)
                 } else {
                     _authState.value = AuthState.Error(response.message)
                 }
