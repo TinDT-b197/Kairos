@@ -7,61 +7,62 @@ import com.example.kairos.network.RetrofitClient
 import com.example.kairos.network.Transaction
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-// Trạng thái khi bấm nút Xác nhận
-sealed class ConfirmState {
-    object Idle : ConfirmState()
-    object Loading : ConfirmState()
-    data class Success(val message: String) : ConfirmState()
-    data class Error(val message: String) : ConfirmState()
-}
-
 class BookingViewModel : ViewModel() {
-    // Lưu danh sách lịch sử học tập
+    // 1. Biến chứa danh sách lịch sử
     private val _bookings = MutableStateFlow<List<Transaction>>(emptyList())
-    val bookings: StateFlow<List<Transaction>> = _bookings.asStateFlow()
+    val bookings: StateFlow<List<Transaction>> = _bookings
 
-    // Lưu trạng thái nút bấm Xác nhận
-    private val _confirmState = MutableStateFlow<ConfirmState>(ConfirmState.Idle)
-    val confirmState: StateFlow<ConfirmState> = _confirmState.asStateFlow()
+    // 2. Biến điều khiển vòng xoay Loading (Sửa lỗi đỏ isLoading)
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-    // 1. Lấy danh sách giao dịch của user đang đăng nhập
+    // 3. Biến chứa thông báo Toast (Sửa lỗi đỏ message)
+    private val _message = MutableStateFlow("")
+    val message: StateFlow<String> = _message
+
+    // Lấy danh sách lịch sử từ Database
     fun loadBookings(userId: Int) {
+        if (userId == -1) return
         viewModelScope.launch {
+            _isLoading.value = true // Bật xoay xoay
             try {
                 val response = RetrofitClient.apiService.getMyBookings(userId)
-                if (response.status == "success" && response.data != null) {
-                    _bookings.value = response.data
+                if (response.status == "success") {
+                    _bookings.value = response.data ?: emptyList()
+                } else {
+                    _message.value = "Không thể tải danh sách lịch sử"
                 }
             } catch (e: Exception) {
-                android.util.Log.e("KAIROS_DEBUG", "Lỗi tải lịch sử: ${e.message}")
+                _message.value = "Lỗi mạng: ${e.message}"
+            } finally {
+                _isLoading.value = false // Tắt xoay xoay
             }
         }
     }
 
-    // 2. Khi bấm xác nhận: Gọi API -> Cập nhật thành công -> Gọi lại loadBookings để làm mới UI
-    fun confirm(transactionId: Int, userId: Int) {
-        _confirmState.value = ConfirmState.Loading
+    // Xử lý xác nhận hoàn thành (Giải ngân Escrow)
+    fun confirmTransaction(transactionId: Int, userId: Int) {
         viewModelScope.launch {
+            _isLoading.value = true
             try {
                 val response = RetrofitClient.apiService.confirmTransaction(ConfirmRequest(transactionId))
+                _message.value = response.message
                 if (response.status == "success") {
-                    _confirmState.value = ConfirmState.Success(response.message)
-
-                    // TẢI LẠI DANH SÁCH NGAY LẬP TỨC ĐỂ HIỆN CHỮ "HOÀN THÀNH"
+                    // CỰC KỲ QUAN TRỌNG: Tải lại danh sách để cập nhật trạng thái COMPLETED
                     loadBookings(userId)
-                } else {
-                    _confirmState.value = ConfirmState.Error(response.message)
                 }
             } catch (e: Exception) {
-                _confirmState.value = ConfirmState.Error("Lỗi kết nối: ${e.message}")
+                _message.value = "Lỗi xác nhận: ${e.message}"
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
-    fun resetConfirmState() {
-        _confirmState.value = ConfirmState.Idle
+    // Hàm xóa thông báo sau khi đã hiển thị xong (Sửa lỗi đỏ clearMessage)
+    fun clearMessage() {
+        _message.value = ""
     }
 }
