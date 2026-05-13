@@ -11,9 +11,15 @@ interface KairosApiService {
     suspend fun register(@Body request: RegisterRequest): AuthResponse
     @POST("login.php") // THÊM DÒNG NÀY
     suspend fun login(@Body request: LoginRequest): AuthResponse
-    @POST("create_skill.php")
-    suspend fun createSkill(@Body request: SkillRequest): BaseResponse
 
+    @POST("manage_skill.php?action=add")
+    suspend fun addSkill(@Body request: SkillRequest): BaseResponse
+
+    @POST("manage_skill.php?action=edit")
+    suspend fun editSkill(@Body request: SkillRequest): BaseResponse
+
+    @POST("manage_skill.php?action=delete")
+    suspend fun deleteSkill(@Body request: SkillRequest): BaseResponse
     @GET("fetch_skills.php")
     suspend fun fetchAllSkills(): SkillListResponse
 
@@ -34,4 +40,8 @@ interface KairosApiService {
 
     @GET("fetch_wallet_history.php")
     suspend fun getWalletHistory(@Query("user_id") userId: Int): WalletHistoryResponse
+
+    @GET("fetch_skills.php")
+    suspend fun getSkills(
+        @Query("user_id") userId: Int? = null): SkillListResponse
 }

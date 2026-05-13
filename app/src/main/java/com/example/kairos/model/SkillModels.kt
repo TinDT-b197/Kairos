@@ -14,10 +14,11 @@ data class Skill(
 )
 
 data class SkillRequest(
+    @SerializedName("skill_id") val skillId: Int = 0 ,
     @SerializedName("user_id") val userId: Int,
-    val title: String,
-    val description: String,
-    @SerializedName("price_diamonds") val priceDiamonds: Int
+    val title: String = "",
+    val description: String = "",
+    @SerializedName("price_diamonds") val priceDiamonds: Int = 0
 )
 
 data class SkillListResponse(

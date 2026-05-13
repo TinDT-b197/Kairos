@@ -32,7 +32,7 @@ import com.example.kairos.viewmodel.HomeViewModel
 @Composable
 fun HomeScreen(
     onNavigateToCreateSkill: () -> Unit,
-    onNavigateToMyBookings: () -> Unit,
+    onNavigateToHistory: () -> Unit,
     onNavigateToSkillDetail: (Skill) -> Unit,
     homeViewModel: HomeViewModel = viewModel()
 ) {

@@ -21,7 +21,7 @@ import com.example.kairos.model.SharedData
 
 sealed class Screen(val route: String, val label: String, val icon: ImageVector) {
     object Home : Screen("home", "Trang chủ", Icons.Default.Home)
-    object MyBookings : Screen("my_bookings", "Lịch sử", Icons.Default.List)
+    object History : Screen("history", "Lịch sử", Icons.Default.List)
     object Profile : Screen("profile", "Cá nhân", Icons.Default.Person)
 }
 
@@ -33,7 +33,7 @@ fun MainScreen() {
 
     val showBottomBar = currentRoute in listOf(
         Screen.Home.route,
-        Screen.MyBookings.route,
+        Screen.History.route,
         Screen.Profile.route
     )
 
@@ -41,7 +41,7 @@ fun MainScreen() {
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar(containerColor = Color.White) {
-                    val items = listOf(Screen.Home, Screen.MyBookings, Screen.Profile)
+                    val items = listOf(Screen.Home, Screen.History, Screen.Profile)
                     items.forEach { screen ->
                         NavigationBarItem(
                             // 2. Sử dụng thẻ Icon thay vì Text
@@ -99,8 +99,8 @@ fun MainScreen() {
                 // Giai đoạn 2: Home
                 composable(Screen.Home.route) {
                     HomeScreen(
-                        onNavigateToCreateSkill = { navController.navigate("create_skill") },
-                        onNavigateToMyBookings = { navController.navigate(Screen.MyBookings.route) },
+                        onNavigateToCreateSkill = { navController.navigate("create_skill") }, // <-- Gọn gàng
+                        onNavigateToHistory = { navController.navigate(Screen.History.route) },
                         onNavigateToSkillDetail = { skill ->
                             SharedData.selectedSkill = skill
                             navController.navigate("skill_detail")
@@ -108,8 +108,8 @@ fun MainScreen() {
                     )
                 }
 
-                // Giai đoạn 3: Lịch sử học
-                composable(Screen.MyBookings.route) {
+                // Giai đoạn 3: Lịch sử
+                composable(Screen.History.route) {
                     HistoryScreen(
                         onBack = { navController.popBackStack() },
                         onNavigateToChat = { txnId -> /* Giai đoạn 4 */ }
@@ -124,8 +124,17 @@ fun MainScreen() {
                                 popUpTo(0) { inclusive = true }
                             }
                         },
-                        onNavigateToMySales = {
-                            navController.navigate("my_sales")
+                        onNavigateToMySkill = {
+                            navController.navigate("my_skills")
+                        },
+                        onNavigateToHistory = {
+                            navController.navigate(Screen.History.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
                     )
                 }
@@ -143,6 +152,21 @@ fun MainScreen() {
                             onNavigateBack = { navController.popBackStack() }
                         )
                     }
+                }
+                composable("my_skills") {
+                    MySkillScreen(
+                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateToEdit = { skill ->
+                            SharedData.selectedSkill = skill
+                            navController.navigate("edit_skill")
+                        },
+                        onNavigateToCreate = {
+                            navController.navigate("create_skill")
+                        }
+                    )
+                }
+                composable("edit_skill") {
+                    EditSkillScreen(onNavigateBack = { navController.popBackStack() })
                 }
             }
         }

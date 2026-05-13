@@ -15,13 +15,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.kairos.model.SharedData
 import com.example.kairos.network.SessionManager
 import com.example.kairos.viewmodel.SkillState
 import com.example.kairos.viewmodel.SkillViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateSkillScreen(
+fun EditSkillScreen(
     onNavigateBack: () -> Unit,
     skillViewModel: SkillViewModel = viewModel()
 ) {
@@ -29,12 +30,20 @@ fun CreateSkillScreen(
     val sessionManager = remember { SessionManager(context) }
     val userId = sessionManager.getUserId()
 
-    // Biến trống hoàn toàn cho Tạo mới
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var priceStr by remember { mutableStateOf("") }
+    // Lấy data từ SharedData
+    val skillToEdit = SharedData.selectedSkill
+
+    // Gán dữ liệu cũ vào
+    var title by remember { mutableStateOf(skillToEdit?.title ?: "") }
+    var description by remember { mutableStateOf(skillToEdit?.description ?: "") }
+    var priceStr by remember { mutableStateOf(skillToEdit?.priceDiamonds?.toString() ?: "") }
 
     val skillState by skillViewModel.skillState.collectAsState()
+
+    // Dọn rác khi thoát màn hình Edit
+    DisposableEffect(Unit) {
+        onDispose { SharedData.selectedSkill = null }
+    }
 
     LaunchedEffect(skillState) {
         when (skillState) {
@@ -54,7 +63,7 @@ fun CreateSkillScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Tạo kỹ năng mới", fontWeight = FontWeight.Bold) },
+                title = { Text("Sửa bài đăng", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Quay lại") }
                 }
@@ -71,12 +80,12 @@ fun CreateSkillScreen(
             Button(
                 onClick = {
                     val price = priceStr.toIntOrNull() ?: 0
-                    if (title.isBlank() || description.isBlank() || price <= 0) {
+                    if (title.isBlank() || description.isBlank() || price <= 0 || skillToEdit == null) {
                         Toast.makeText(context, "Vui lòng nhập đủ thông tin hợp lệ", Toast.LENGTH_SHORT).show()
                         return@Button
                     }
-                    // Chỉ gọi Create
-                    skillViewModel.createSkill(userId, title, description, price)
+                    // Chỉ gọi Edit
+                    skillViewModel.editSkill(skillToEdit.skillId, userId, title, description, price)
                 },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 enabled = skillState !is SkillState.Loading,
@@ -85,7 +94,7 @@ fun CreateSkillScreen(
                 if (skillState is SkillState.Loading) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                 } else {
-                    Text("Đăng bài", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text("Cập nhật", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
