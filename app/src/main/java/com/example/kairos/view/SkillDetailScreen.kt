@@ -88,27 +88,37 @@ fun SkillDetailScreen(
                     Text("Giá khóa học", color = Color.Gray, fontSize = 14.sp)
                     Text("${skill.priceDiamonds} 💎", fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 }
+                if (buyerId == skill.sellerId) {
 
-                Button(
-                    onClick = {
-                        // Kiểm tra không cho phép tự mua bài của chính mình
-                        // Giả sử bảng Skills có lưu seller_id, ở đây anh dùng ID mặc định là 1 để demo
-                        // Trong thực tế, class Skill của em cần có thêm trường seller_id
-                        val sellerId = 1
-                        if (buyerId != sellerId) {
-                            viewModel.bookSkill(buyerId, sellerId, skill.skillId, skill.priceDiamonds)
+                    Button(
+                        onClick = { /* Không làm gì */ },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
+                        enabled = false
+                    ) {
+                        Text("Kỹ năng của bạn", color = Color.DarkGray, fontSize = 16.sp)
+                    }
+                } else {
+                    // Nếu là người khác -> Cho phép đăng ký học
+                    Button(
+                        onClick = {
+                            // Truyền skill.sellerId (ID thật của tác giả) thay vì số 1
+                            viewModel.bookSkill(
+                                buyerId = buyerId,
+                                sellerId = skill.sellerId,
+                                skillId = skill.skillId,
+                                price = skill.priceDiamonds
+                            )
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+                        enabled = txnState !is TransactionState.Loading
+                    ) {
+                        if (txnState is TransactionState.Loading) {
+                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                         } else {
-                            Toast.makeText(context, "Bạn không thể tự mua kỹ năng của mình!", Toast.LENGTH_SHORT).show()
+                            Text("Đăng ký", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         }
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
-                    enabled = txnState !is TransactionState.Loading
-                ) {
-                    if (txnState is TransactionState.Loading) {
-                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                    } else {
-                        Text("Mua ngay", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }

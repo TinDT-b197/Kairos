@@ -22,10 +22,12 @@ data class TransactionListResponse(
     val data: List<Transaction>?
 )
 
-data class ConfirmRequest(
-    @SerializedName("transaction_id") val transactionId: Int
+data class ConfirmReviewRequest(
+    @SerializedName("transaction_id") val transaction_id: Int,
+    @SerializedName("reviewer_id") val reviewer_id: Int,
+    val rating: Int,
+    val comment: String
 )
-
 data class SaleTransaction(
     @SerializedName("transaction_id") val transactionId: Int,
     val title: String,

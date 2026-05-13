@@ -4,10 +4,13 @@ import com.google.gson.annotations.SerializedName
 
 data class Skill(
     @SerializedName("skill_id") val skillId: Int,
+    @SerializedName("user_id") val sellerId: Int,
     val title: String,
     val description: String,
     @SerializedName("price_diamonds") val priceDiamonds: Int,
-    @SerializedName("author_name") val authorName: String
+    @SerializedName("author_name") val authorName: String,
+    @SerializedName("avg_rating") val avgRating: Float = 0f,
+    @SerializedName("total_reviews") val totalReviews: Int = 0
 )
 
 data class SkillRequest(

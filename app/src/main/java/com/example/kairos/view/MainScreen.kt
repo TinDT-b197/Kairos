@@ -2,11 +2,16 @@ package com.example.kairos.view
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,10 +19,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.kairos.model.SharedData
 
-sealed class Screen(val route: String, val label: String) {
-    object Home : Screen("home", "Trang chủ")
-    object MyBookings : Screen("my_bookings", "Lịch sử")
-    object Profile : Screen("profile", "Cá nhân")
+sealed class Screen(val route: String, val label: String, val icon: ImageVector) {
+    object Home : Screen("home", "Trang chủ", Icons.Default.Home)
+    object MyBookings : Screen("my_bookings", "Lịch sử", Icons.Default.List)
+    object Profile : Screen("profile", "Cá nhân", Icons.Default.Person)
 }
 
 @Composable
@@ -39,13 +44,14 @@ fun MainScreen() {
                     val items = listOf(Screen.Home, Screen.MyBookings, Screen.Profile)
                     items.forEach { screen ->
                         NavigationBarItem(
-                            icon = { Text(screen.label.first().toString()) },
+                            // 2. Sử dụng thẻ Icon thay vì Text
+                            icon = { Icon(imageVector = screen.icon, contentDescription = screen.label) },
                             label = { Text(screen.label) },
                             selected = currentRoute == screen.route,
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = Color.White,
                                 selectedTextColor = Color.Black,
-                                indicatorColor = Color.Black,
+                                indicatorColor = Color.Black, // Màu nền đen khi được chọn
                                 unselectedIconColor = Color.Gray,
                                 unselectedTextColor = Color.Gray
                             ),
@@ -110,7 +116,7 @@ fun MainScreen() {
                     )
                 }
 
-                // Giai đoạn 3: Profile (ĐÃ SỬA LẠI ONLOGOUT VÀ THÊM ONAVIGATETOMYSALES)
+                // Giai đoạn 3: Profile
                 composable(Screen.Profile.route) {
                     ProfileScreen(
                         onLogout = {

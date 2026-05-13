@@ -68,7 +68,7 @@ fun CreateSkillScreen(
         OutlinedTextField(
             value = title,
             onValueChange = { title = it },
-            placeholder = { Text("VD: Dạy lập trình Android cơ bản", color = Color.LightGray) },
+            placeholder = { Text("Kĩ năng bạn muốn dạy", color = Color.LightGray) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color.Black)
