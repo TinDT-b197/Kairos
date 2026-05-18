@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.kairos.network.RetrofitClient
-import com.example.kairos.model.SaleTransaction
+import com.example.kairos.model.TeachingTransaction
 import com.example.kairos.model.WalletHistory
 import com.example.kairos.network.SessionManager
 import com.example.kairos.viewmodel.BookingViewModel
@@ -35,33 +35,29 @@ import com.example.kairos.viewmodel.BookingViewModel
 @Composable
 fun HistoryScreen(
     onBack: () -> Unit,
-    onNavigateToChat: (Int) -> Unit,
+    onNavigateToChat: (transactionId: Int, partnerName: String) -> Unit,
+    onNavigateToReport: (transactionId: Int, reportedUserId: Int) -> Unit,
     bookingViewModel: BookingViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val sessionManager = remember { SessionManager(context) }
     val userId = sessionManager.getUserId()
 
-    // --- STATE QUẢN LÝ GIAO DIỆN ---
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Học tập", "Giảng dạy", "Ví tiền")
 
-    // State cho Dialog Đánh giá
     var showRatingDialog by remember { mutableStateOf(false) }
     var currentTxnId by remember { mutableIntStateOf(-1) }
 
-    // Dữ liệu từ ViewModel (Tab Học tập)
     val bookings by bookingViewModel.bookings.collectAsState()
     val isBookingsLoading by bookingViewModel.isLoading.collectAsState()
     val message by bookingViewModel.message.collectAsState()
 
-    // Dữ liệu cho các Tab khác
-    var salesList by remember { mutableStateOf<List<SaleTransaction>>(emptyList()) }
+    var salesList by remember { mutableStateOf<List<TeachingTransaction>>(emptyList()) }
     var isSalesLoading by remember { mutableStateOf(false) }
     var walletList by remember { mutableStateOf<List<WalletHistory>>(emptyList()) }
     var isWalletLoading by remember { mutableStateOf(false) }
 
-    // --- LOGIC TẢI DỮ LIỆU ---
     LaunchedEffect(selectedTab) {
         when (selectedTab) {
             0 -> bookingViewModel.loadBookings(userId)
@@ -86,7 +82,6 @@ fun HistoryScreen(
         }
     }
 
-    // Hiển thị Toast thông báo
     LaunchedEffect(message) {
         if (message.isNotEmpty()) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -94,12 +89,10 @@ fun HistoryScreen(
         }
     }
 
-    // --- HIỂN THỊ DIALOG ĐÁNH GIÁ ---
     if (showRatingDialog) {
         RatingDialog(
             onDismiss = { showRatingDialog = false },
             onSubmit = { rating, comment ->
-                // Khi bấm gửi ở Dialog, lúc này mới gọi API Confirm & Release tiền
                 bookingViewModel.confirmWithReview(
                     transactionId = currentTxnId,
                     reviewerId = userId,
@@ -112,7 +105,6 @@ fun HistoryScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFFBFBFB))) {
-        // --- HEADER ---
         Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
             IconButton(onClick = onBack, modifier = Modifier.offset(x = (-12).dp)) {
                 Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.Gray)
@@ -120,7 +112,6 @@ fun HistoryScreen(
             Text("Hoạt động của tôi", fontSize = 28.sp, fontWeight = FontWeight.Bold)
         }
 
-        // --- TAB BAR ---
         TabRow(
             selectedTabIndex = selectedTab,
             containerColor = Color.White,
@@ -147,10 +138,9 @@ fun HistoryScreen(
             }
         }
 
-        // --- NỘI DUNG TỪNG TAB ---
         Box(modifier = Modifier.fillMaxSize().padding(24.dp)) {
             when (selectedTab) {
-                0 -> { // TAB HỌC TẬP
+                0 -> {
                     if (isBookingsLoading) {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color.Black)
                     } else if (bookings.isEmpty()) {
@@ -165,17 +155,18 @@ fun HistoryScreen(
                                     status = txn.status,
                                     isBuyer = true,
                                     onConfirm = {
-                                        // BƯỚC QUAN TRỌNG: Lưu ID và bật Dialog lên trước
                                         currentTxnId = txn.transactionId
                                         showRatingDialog = true
                                     },
-                                    onChat = { onNavigateToChat(txn.transactionId) }
+                                    // Truyền partnerName = tên người dạy
+                                    onChat = { onNavigateToChat(txn.transactionId, txn.sellerName) },
+                                    onReport = { onNavigateToReport(txn.transactionId, txn.sellerId) }
                                 )
                             }
                         }
                     }
                 }
-                1 -> { // TAB GIẢNG DẠY
+                1 -> {
                     if (isSalesLoading) {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color.Black)
                     } else if (salesList.isEmpty()) {
@@ -190,13 +181,15 @@ fun HistoryScreen(
                                     status = sale.status,
                                     isBuyer = false,
                                     onConfirm = {},
-                                    onChat = { onNavigateToChat(sale.transactionId) }
+                                    // Truyền partnerName = tên học viên
+                                    onChat = { onNavigateToChat(sale.transactionId, sale.buyerName) },
+                                    onReport = { onNavigateToReport(sale.transactionId, sale.buyerId) }
                                 )
                             }
                         }
                     }
                 }
-                2 -> { // TAB VÍ TIỀN
+                2 -> {
                     if (isWalletLoading) {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color.Black)
                     } else if (walletList.isEmpty()) {
@@ -213,6 +206,8 @@ fun HistoryScreen(
         }
     }
 }
+
+// ---- Các Composable phụ (giữ nguyên từ bản cũ) ----
 
 @Composable
 fun RatingDialog(onDismiss: () -> Unit, onSubmit: (Int, String) -> Unit) {
@@ -298,7 +293,8 @@ fun WalletHistoryItem(history: WalletHistory) {
 @Composable
 fun HistoryCard(
     title: String, subTitle: String, price: String, status: String,
-    isBuyer: Boolean, onConfirm: () -> Unit, onChat: () -> Unit
+    isBuyer: Boolean, onConfirm: () -> Unit, onChat: () -> Unit,
+    onReport: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -326,13 +322,20 @@ fun HistoryCard(
                     }
                 } else {
                     Surface(color = Color(0xFFE8F5E9), shape = RoundedCornerShape(8.dp)) {
-                        Text("Hoàn thành", color = Color(0xFF2E7D32),
+                        Text(
+                            "Hoàn thành", color = Color(0xFF2E7D32),
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                            fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            fontSize = 12.sp, fontWeight = FontWeight.Bold
+                        )
                     }
                 }
                 TextButton(onClick = onChat) {
                     Text("Nhắn tin 💬", fontSize = 12.sp, color = Color.Blue)
+                }
+                if (status.equals("PENDING", ignoreCase = true)) {
+                    TextButton(onClick = onReport) {
+                        Text("Báo cáo", fontSize = 12.sp, color = Color.Red)
+                    }
                 }
             }
         }

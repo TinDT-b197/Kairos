@@ -35,3 +35,9 @@ data class UserProfileResponse(
     val status: String,
     val data: UserProfile?
 )
+
+data class UpdateProfileRequest(
+    @SerializedName("user_id") val userId: Int,
+    val name: String,
+    val bio: String
+)

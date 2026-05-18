@@ -9,17 +9,18 @@ data class BookSkillRequest(
     val price: Int
 )
 
-data class Transaction(
+data class LearningTransaction(
     @SerializedName("transaction_id") val transactionId: Int,
     val title: String,
+    @SerializedName("seller_id") val sellerId: Int,
     @SerializedName("seller_name") val sellerName: String,
     @SerializedName("price_diamonds") val priceDiamonds: Int,
     val status: String
 )
 
-data class TransactionListResponse(
+data class LearningTransactionListResponse(
     val status: String,
-    val data: List<Transaction>?
+    val data: List<LearningTransaction>?
 )
 
 data class ConfirmReviewRequest(
@@ -28,15 +29,16 @@ data class ConfirmReviewRequest(
     val rating: Int,
     val comment: String
 )
-data class SaleTransaction(
+data class TeachingTransaction(
     @SerializedName("transaction_id") val transactionId: Int,
     val title: String,
+    @SerializedName("buyer_id") val buyerId: Int,
     @SerializedName("buyer_name") val buyerName: String,
     @SerializedName("price_diamonds") val priceDiamonds: Int,
     val status: String
 )
 
-data class SaleListResponse(
+data class TeachingListResponse(
     val status: String,
-    val data: List<SaleTransaction>?
+    val data: List<TeachingTransaction>?
 )

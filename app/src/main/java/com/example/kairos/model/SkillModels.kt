@@ -10,6 +10,7 @@ data class Skill(
     @SerializedName("price_diamonds") val priceDiamonds: Int,
     @SerializedName("author_name") val authorName: String,
     @SerializedName("avg_rating") val avgRating: Float = 0f,
+    @SerializedName("total_learners") val totalLearners: Int = 0,
     @SerializedName("total_reviews") val totalReviews: Int = 0
 )
 

@@ -272,23 +272,33 @@ fun SkillHorizontalCard(skill: Skill, modifier: Modifier = Modifier, onClick: ()
                 )
                 Text(text = " 💎", fontSize = 12.sp)
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            if (skill.totalReviews == 0) {
+                // Nếu chưa có ai đánh giá
+                Text(
+                    text = "Khóa mới",
+                    color = Color(0xFFE91E63), // Màu hồng nổi bật
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            } else {
+                // Nếu đã có đánh giá
                 Icon(
                     imageVector = Icons.Default.Star,
-                    contentDescription = null,
+                    contentDescription = "Rating",
                     tint = Color(0xFFFFB300),
-                    modifier = Modifier.size(14.dp)
+                    modifier = Modifier.size(16.dp).padding(start = 8.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = String.format("%.1f", skill.avgRating),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
                 )
                 Text(
                     text = " (${skill.totalReviews})",
-                    fontSize = 12.sp,
-                    color = Color.Gray
+                    color = Color.Gray,
+                    fontSize = 12.sp
                 )
             }
         }

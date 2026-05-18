@@ -21,8 +21,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.kairos.network.RetrofitClient
 import com.example.kairos.network.SessionManager
-import com.example.kairos.model.UserProfile
-import com.example.kairos.model.Skill // Đảm bảo đã có model Skill
 import com.example.kairos.viewmodel.ProfileViewModel
 
 @Composable
@@ -30,6 +28,8 @@ fun ProfileScreen(
     onLogout: () -> Unit,
     onNavigateToMySkill: () -> Unit,
     onNavigateToHistory: () -> Unit,
+    onNavigateToDeposit: () -> Unit,
+    onNavigateToEditProfile: () -> Unit,
     profileViewModel: ProfileViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -110,7 +110,7 @@ fun ProfileScreen(
                             }
                         }
                         Button(
-                            onClick = { /* Nạp tiền */ },
+                            onClick = {onNavigateToDeposit()},
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D47A1)),
                             shape = RoundedCornerShape(12.dp)
                         ) { Text("Nạp thêm", fontSize = 12.sp) }
@@ -130,7 +130,7 @@ fun ProfileScreen(
                 }
             }
 
-            // --- 4. KỸ NĂNG CỦA TÔI (DỮ LIỆU THẬT) ---
+            // --- 4. KỸ NĂNG CỦA TÔI ---
             item {
                 ProfileSection(title = "Kỹ năng của tôi") {
                     if (mySkills.isEmpty()) {
@@ -170,10 +170,14 @@ fun ProfileScreen(
                         text = "Lịch sử giao dịch",
                         onClick = onNavigateToHistory
                     )
-                    SettingRow(Icons.Default.Security, "Bảo mật tài khoản")
+                    SettingRow(
+                        Icons.Default.Security,
+                        text = "Hồ sơ cá nhân",
+                        onClick = onNavigateToEditProfile
+                    )
                     SettingRow(
                         icon = Icons.Default.Logout,
-                        text = "Đăng xuất hệ thống",
+                        text = "Đăng xuất",
                         textColor = Color.Red,
                         onClick = {
                             sessionManager.logout()
