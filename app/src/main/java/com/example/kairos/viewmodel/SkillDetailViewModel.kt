@@ -2,7 +2,7 @@ package com.example.kairos.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.kairos.network.BookSkillRequest
+import com.example.kairos.model.BookSkillRequest
 import com.example.kairos.network.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
