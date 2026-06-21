@@ -61,4 +61,7 @@ interface KairosApiService {
 
     @POST("request_deposit.php")
     suspend fun requestDeposit(@Body request: DepositRequest): BaseResponse
+
+    @GET("fetch_notifications.php")
+    suspend fun getNotifications(@Query("user_id") userId: Int): NotificationResponse
 }

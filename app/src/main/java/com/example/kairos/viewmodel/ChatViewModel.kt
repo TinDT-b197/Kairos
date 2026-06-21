@@ -56,6 +56,7 @@ class ChatViewModel : ViewModel() {
 
     fun sendMessage(transactionId: Int, senderId: Int, message: String) {
         if (message.isBlank()) return
+        android.util.Log.d("CHAT_DEBUG", "Gửi tin: TxID=$transactionId, SenderID=$senderId, Msg=$message")
         _isSending.value = true
         viewModelScope.launch {
             try {

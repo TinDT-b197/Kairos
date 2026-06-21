@@ -100,7 +100,8 @@ fun MainScreen() {
                         onNavigateToSkillDetail = { skill ->
                             SharedData.selectedSkill = skill
                             navController.navigate("skill_detail")
-                        }
+                        },
+                        onNavigateToNotifications = { navController.navigate("notifications") }
                     )
                 }
 
@@ -224,6 +225,11 @@ fun MainScreen() {
                 composable("edit_profile") {
                     EditProfileScreen(
                         onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+                composable("notifications") {
+                    NotificationScreen(
+                        onBack = { navController.popBackStack() }
                     )
                 }
             }
