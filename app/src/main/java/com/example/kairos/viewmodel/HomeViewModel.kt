@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
-    // Biến chứa danh sách bài đăng (Chuẩn tên của em)
     private val _skillList = MutableStateFlow<List<Skill>>(emptyList())
     val skillList: StateFlow<List<Skill>> = _skillList.asStateFlow()
 

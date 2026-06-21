@@ -1,6 +1,7 @@
 package com.example.kairos.view
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -11,11 +12,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -35,92 +37,120 @@ fun ProfileScreen(
     val context = LocalContext.current
     val sessionManager = remember { SessionManager(context) }
 
-    // Quan sát dữ liệu từ ViewModel
     val profileData by profileViewModel.userProfile.collectAsState()
     val mySkills by profileViewModel.mySkills.collectAsState()
     val isLoading by profileViewModel.isLoading.collectAsState()
 
-    val blueGradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFF1976D2), Color(0xFF64B5F6))
-    )
-
-    // Tải dữ liệu khi màn hình mở ra
     LaunchedEffect(Unit) {
         val userId = sessionManager.getUserId()
         if (userId != -1) {
             profileViewModel.loadProfile(userId)
-            profileViewModel.loadMySkills(userId) // Hàm này gọi fetch_skills.php?user_id=...
+            profileViewModel.loadMySkills(userId)
         }
     }
 
     if (isLoading && profileData == null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = Color(0xFF1976D2))
+        Box(
+            modifier = Modifier.fillMaxSize().background(Color(0xFFf5eedc)),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = Color(0xFF14213d))
         }
         return
     }
 
     profileData?.let { user ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().background(Color(0xFFF5F9FF)),
-            contentPadding = PaddingValues(bottom = 100.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFf5eedc)), // Màu nền Cream chuẩn
+            contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp)
         ) {
-            // --- 1. HEADER ---
+            // --- 1. THẺ THÔNG TIN TÀI KHOẢN & VÍ (Giao diện Dark Blue mới) ---
             item {
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(260.dp).background(blueGradient),
-                    contentAlignment = Alignment.Center
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 8.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF14213d)),
+                    elevation = CardDefaults.cardElevation(4.dp)
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Surface(
-                            modifier = Modifier.size(90.dp),
-                            shape = CircleShape,
-                            color = Color.White.copy(alpha = 0.2f)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        // Hàng Avatar và Tên
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(65.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF2a3b5c)),
+                                contentAlignment = Alignment.Center
+                            ) {
                                 Text(
                                     text = user.name.first().toString().uppercase(),
-                                    fontSize = 36.sp,
+                                    fontSize = 28.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = Color.White
                                 )
                             }
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(user.name, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                        Text(user.email, color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp)
-                    }
-                }
-            }
-
-            // --- 2. VÍ TIỀN ---
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).offset(y = (-40).dp),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(8.dp)
-                ) {
-                    Row(modifier = Modifier.padding(24.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("Số dư Ví KAIROS", color = Color.Gray, fontSize = 13.sp)
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("${user.diamondBalance}", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0D47A1))
-                                Text(" 💎", fontSize = 20.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text(
+                                    text = user.name,
+                                    color = Color.White,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = user.email,
+                                    color = Color.LightGray,
+                                    fontSize = 13.sp
+                                )
                             }
                         }
-                        Button(
-                            onClick = {onNavigateToDeposit()},
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D47A1)),
-                            shape = RoundedCornerShape(12.dp)
-                        ) { Text("Nạp thêm", fontSize = 12.sp) }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Khung Ví KAIROS bên trong
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFF2a3b5c), RoundedCornerShape(16.dp))
+                                .padding(horizontal = 20.dp, vertical = 16.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text("Ví KAIROS", color = Color.LightGray, fontSize = 12.sp)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "${user.diamondBalance} xu", // Đổi icon 💎 thành chữ 'xu' theo ảnh
+                                        color = Color.White,
+                                        fontSize = 22.sp,
+                                        fontWeight = FontWeight.ExtraBold
+                                    )
+                                }
+                                Button(
+                                    onClick = onNavigateToDeposit,
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF20c997)), // Màu nút ngọc Teal
+                                    shape = RoundedCornerShape(12.dp),
+                                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp)
+                                ) {
+                                    Text("Nạp tiền", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                }
+                            }
+                        }
                     }
                 }
             }
 
-            // --- 3. BIO ---
+            // --- 2. GIỚI THIỆU ---
             item {
-                ProfileSection(title = "Giới thiệu bản thân") {
+                ProfileSection(title = "Giới thiệu") {
                     Text(
                         text = user.bio ?: "Chưa có thông tin giới thiệu.",
                         fontSize = 15.sp,
@@ -130,39 +160,50 @@ fun ProfileScreen(
                 }
             }
 
-            // --- 4. KỸ NĂNG CỦA TÔI ---
+            // --- 3. KỸ NĂNG CỦA TÔI ---
             item {
                 ProfileSection(title = "Kỹ năng của tôi") {
                     if (mySkills.isEmpty()) {
                         Text("Bạn chưa đăng kỹ năng nào.", color = Color.Gray, fontSize = 14.sp)
                     } else {
-                        // CHUNKED(2): Chia danh sách thành từng hàng 2 cái
                         mySkills.chunked(2).forEach { rowSkills ->
                             Row(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 6.dp),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 rowSkills.forEach { skill ->
                                     SmallSkillItem(
                                         name = skill.title,
-                                        rating = "${String.format("%.1f", skill.avgRating)} ⭐",
+                                        rating = "${String.format("%.1f", skill.avgRating)} ★",
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
-                                // Nếu hàng chỉ có 1 cái, thêm Spacer để layout không bị lệch
+                                // Cân bằng UI nếu mảng lẻ
                                 if (rowSkills.size == 1) {
                                     Spacer(modifier = Modifier.weight(1f))
                                 }
                             }
                         }
                     }
-                    TextButton(onClick = onNavigateToMySkill, modifier = Modifier.fillMaxWidth()) {
-                        Text("Xem tất cả kỹ năng →", color = Color(0xFF1976D2), fontSize = 13.sp)
-                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Xem tất cả kỹ năng",
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigateToMySkill() }
+                            .padding(vertical = 8.dp)
+                    )
                 }
             }
 
-            // --- 5. TÀI KHOẢN ---
+            // --- 4. TÀI KHOẢN ---
             item {
                 ProfileSection(title = "Tài khoản") {
                     SettingRow(
@@ -171,14 +212,16 @@ fun ProfileScreen(
                         onClick = onNavigateToHistory
                     )
                     SettingRow(
-                        Icons.Default.Security,
+                        icon = Icons.Default.Security,
                         text = "Hồ sơ cá nhân",
                         onClick = onNavigateToEditProfile
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
                     SettingRow(
                         icon = Icons.Default.Logout,
                         text = "Đăng xuất",
                         textColor = Color.Red,
+                        iconColor = Color.Red,
                         onClick = {
                             sessionManager.logout()
                             onLogout()
@@ -190,18 +233,21 @@ fun ProfileScreen(
     }
 }
 
-// --- CÁC COMPONENT PHỤ (Giữ nguyên) ---
+// --- CÁC COMPONENT PHỤ (Đã cấu trúc lại UI) ---
+
 @Composable
 fun ProfileSection(title: String, content: @Composable ColumnScope.() -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(2.dp)
+        shape = RoundedCornerShape(24.dp), // Bo góc tròn to theo bản thiết kế
+        elevation = CardDefaults.cardElevation(0.dp)
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
-            Spacer(modifier = Modifier.height(12.dp))
+        Column(modifier = Modifier.padding(24.dp)) {
+            Text(title, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.Black)
+            Spacer(modifier = Modifier.height(16.dp))
             content()
         }
     }
@@ -209,30 +255,64 @@ fun ProfileSection(title: String, content: @Composable ColumnScope.() -> Unit) {
 
 @Composable
 fun SmallSkillItem(name: String, rating: String, modifier: Modifier) {
-    Surface(
-        modifier = modifier,
-        color = Color(0xFFF0F7FF),
-        shape = RoundedCornerShape(12.dp)
+    Box(
+        modifier = modifier
+            .background(Color(0xFFf5eedc), shape = RoundedCornerShape(16.dp)) // Màu nền cream
+            .padding(16.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(name, fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1)
-            Text(rating, color = Color(0xFFFFA000), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        Column {
+            Text(
+                text = name,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = Color.Black,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = rating,
+                color = Color(0xFF20c997), // Đổi màu đánh giá sang Teal
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
 
 @Composable
-fun SettingRow(icon: ImageVector, text: String, textColor: Color = Color.Black, onClick: () -> Unit = {}) {
-    TextButton(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(0.dp)
+fun SettingRow(
+    icon: ImageVector,
+    text: String,
+    textColor: Color = Color.Black,
+    iconColor: Color = Color.Black,
+    onClick: () -> Unit = {}
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, tint = if (textColor == Color.Red) Color.Red else Color.Gray, modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(text, color = textColor, fontSize = 15.sp, modifier = Modifier.weight(1f))
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.LightGray)
-        }
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = iconColor,
+            modifier = Modifier.size(22.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = text,
+            color = textColor,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = if (textColor == Color.Red) Color.Red else Color.Gray
+        )
     }
 }
